@@ -1,6 +1,3 @@
 ---
-# Elasticsearch Ansible Handlers
-
-# Restart Elasticsearch
-- name: Restart Elasticsearch
-  service: name=elasticsearch state=restarted
+- name: restart elasticsearch
+  service: name=elasticsearch state=restarted enabled=yes

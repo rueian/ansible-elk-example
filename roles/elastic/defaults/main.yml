@@ -2,20 +2,16 @@ apt_dependencies:
   - htop
   - ntp
   - unzip
-apt_repos:
-  - 'ppa:webupd8team/java'
+apt_java_repo: ppa:webupd8team/java
 apt_java_package: oracle-java8-installer
-
 apt_cache_valid_time: 300 # seconds between "apt-get update" calls.
 install_java: "true"
-
 
 elasticsearch_repo_version: 1.6
 elasticsearch_pkg: elasticsearch=1.6.0
 
-
 elasticsearch_max_open_files: 65535
-#elasticsearch_http_cors_enabled: "false"
+elasticsearch_http_cors_enabled: "false"
 elasticsearch_heap_size: 1g
 elasticsearch_max_open_files: 65535
 elasticsearch_node_max_local_storage_nodes: 1
