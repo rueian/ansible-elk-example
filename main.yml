@@ -1,0 +1,8 @@
+---
+# Elasticsearch Ansible Playbook
+- hosts: elastic
+  user: vagrant
+  sudo: yes
+  roles:
+    - elastic
+
