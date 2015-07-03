@@ -1,0 +1,53 @@
+# Update repos
+- name: Install python-software-properties
+  apt: pkg=python-software-properties state=present update_cache=yes cache_valid_time={{ apt_cache_valid_time }}
+  when: install_java
+
+- name: Update repositories
+  apt_repository: repo={{ item }} state=present update_cache=yes
+  with_items: apt_repos
+  when: install_java
+
+# Accept Oracle license
+- name: Accept Oracle license prior JDK installation
+  shell: echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections; echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections creates=/usr/lib/jvm/java-7-oracle
+  when: install_java
+
+# Install Java
+- name: Install Java
+  apt: pkg={{ apt_java_package }} state=present
+  when: install_java
+
+# Install dependencies
+- name: Install dependencies
+  apt: pkg={{ item }} state=present
+  with_items: apt_dependencies
+
+- name: Import Elastic GPG Key
+  apt_key: url=http://packages.elasticsearch.org/GPG-KEY-elasticsearch state=present
+
+- name: Add Logstash Repo into source list
+  apt_repository: repo='deb http://packages.elasticsearch.org/logstash/{{logstash_repo_version}}/debian stable main' state=present
+
+- name: Update apt-get
+  apt: update_cache=yes
+
+# Install logstash
+- name: Install dependencies
+  apt: pkg={{ logstash_pkg }} state=present
+
+- name: Create directory to store ssl crt & key
+  file: path={{ ssl_cert_directory }} state=directory
+
+- name: Copy SSL crt
+  copy: src=files/logstash-forwarder.crt dest={{ ssl_cert_directory }}/{{ ssl_cert }}
+
+- name: Copy SSL key
+  copy: src=files/logstash-forwarder.key dest={{ ssl_cert_directory }}/{{ ssl_key }}
+
+- name: Make Logstash start on boot
+  service: name=logstash enabled=yes
+
+- name: Configuring Logstash Node
+  template: src=logstash.conf.j2 dest=/etc/logstash/conf.d/logstash.conf owner=root group=root mode=0644
+  notify: Restart Logstash

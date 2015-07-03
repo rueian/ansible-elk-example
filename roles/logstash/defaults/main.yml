@@ -1,0 +1,17 @@
+apt_dependencies:
+  - htop
+  - ntp
+  - unzip
+apt_repos:
+  - 'ppa:webupd8team/java'
+apt_java_package: oracle-java8-installer
+
+apt_cache_valid_time: 300 # seconds between "apt-get update" calls.
+install_java: "true"
+
+logstash_repo_version: 1.5
+logstash_pkg: logstash
+
+ssl_cert_directory: /etc/pki/tls/certs
+ssl_cert: logstash-forwarder.crt
+ssl_key: logstash-forwarder.key
