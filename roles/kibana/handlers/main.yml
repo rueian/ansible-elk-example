@@ -1,0 +1,6 @@
+---
+# Elasticsearch Ansible Handlers
+
+# Restart Elasticsearch
+- name: Restart Kibana
+  service: name=kibana4 state=restarted

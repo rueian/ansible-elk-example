@@ -1,0 +1,59 @@
+# Update repos
+- name: Install python-software-properties
+  apt: pkg=python-software-properties state=present update_cache=yes cache_valid_time={{ apt_cache_valid_time }}
+  when: install_java
+
+- name: Update repositories
+  apt_repository: repo={{ item }} state=present update_cache=yes
+  with_items: apt_repos
+  when: install_java
+
+# Accept Oracle license
+- name: Accept Oracle license prior JDK installation
+  shell: echo debconf shared/accepted-oracle-license-v1-1 select true | sudo debconf-set-selections; echo debconf shared/accepted-oracle-license-v1-1 seen true | sudo debconf-set-selections creates=/usr/lib/jvm/java-7-oracle
+  when: install_java
+
+# Install Java
+- name: Install Java
+  apt: pkg={{ apt_java_package }} state=present
+  when: install_java
+
+# Install dependencies
+- name: Install dependencies
+  apt: pkg={{ item }} state=present
+  with_items: apt_dependencies
+
+# Check whether we have aleady installed the same version
+- shell: if [ -e /opt/kibana-{{ kibana_version }}-{{ kibana_platform }} ]; then echo yes; else echo no; fi;
+  register: version_exists
+  always_run: True
+
+- name: Download kibana zip
+  get_url: url=https://download.elastic.co/kibana/kibana/kibana-{{ kibana_version }}-{{ kibana_platform }}.zip dest=/tmp
+  when: version_exists.stdout == 'no'
+
+- name: Unarchive kibana zip
+  unarchive: src=/tmp/kibana-{{ kibana_version }}-{{ kibana_platform }}.zip dest=/opt copy=no
+  when: version_exists.stdout == 'no'
+
+- name: Remove old kibana folder link
+  file: path=/opt/kibana state=absent
+
+- name: Link new kibana folder
+  file: path=/opt/kibana
+        src=/opt/kibana-{{ kibana_version }}-{{ kibana_platform }}
+        state=link
+        force=yes
+
+- name: Download kibana start script
+  get_url: url=https://gist.githubusercontent.com/thisismitch/8b15ac909aed214ad04a/raw/bce61d85643c2dcdfbc2728c55a41dab444dca20/kibana4 dest=/etc/init.d
+
+- name: Setup start script attrs
+  file: path=/etc/init.d/kibana4 owner=root group=root mode=0755
+
+- name: Make Kibana start on boot
+  service: name=kibana4 enabled=yes
+
+- name: Configuring Kibana
+  template: src=kibana.yml.j2 dest=/opt/kibana/config/kibana.yml owner=root group=root mode=0644
+  notify: Restart Kibana

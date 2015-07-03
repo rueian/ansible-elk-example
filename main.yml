@@ -4,5 +4,11 @@
   user: vagrant
   sudo: yes
   roles:
-    - elastic
+    - { role: elastic, install_java: "false" }
+
+- hosts: kibana
+  user: vagrant
+  sudo: yes
+  roles:
+    - { role: kibana, install_java: "false" }
 
