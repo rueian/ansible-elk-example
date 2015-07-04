@@ -1,0 +1,11 @@
+- name: Install Nginx
+  apt: pkg=nginx state=present update_cache=yes cache_valid_time={{apt_cache_valid_time}}
+
+- name: Configuring Nginx as reverse proxy
+  template:
+    src: nginx-sites-available-default.j2
+    dest: /etc/nginx/sites-available/default
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart nginx
