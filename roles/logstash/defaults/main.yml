@@ -1,4 +1,7 @@
 logstash_repo_version: 1.5
+logstash_listen_port: 5043
+logstash_bind_host: localhost
+logstash_elasticsearch_host: '["localhost:9300"]'
 
 ssl_cert_directory: /etc/pki/tls/certs
 ssl_cert: logstash-forwarder.crt

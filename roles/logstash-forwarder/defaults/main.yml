@@ -1,4 +1,7 @@
 ssl_cert_directory: /etc/pki/tls/certs
 ssl_cert: logstash-forwarder.crt
+logstash_forwarder_servers: '["localhost:5043"]'
+logstash_forwarder_tag: node
+logstash_forwarder_tag_value: 1
 
 apt_cache_valid_time: 600 # seconds between "apt-get update" calls.

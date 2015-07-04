@@ -5,7 +5,7 @@ port: 5601
 host: "localhost"
 
 # The Elasticsearch instance to use for all your queries.
-elasticsearch_url: "http://localhost:9200"
+elasticsearch_url: "{{ kibana_elasticsearch_url }}"
 
 # preserve_elasticsearch_host true will send the hostname specified in `elasticsearch`. If you set it to false,
 # then the host you use to connect to *this* Kibana instance will be sent.

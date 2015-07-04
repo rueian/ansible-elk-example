@@ -4,24 +4,36 @@
   roles:
     - common
     - java
-    - elastic
-
-- hosts: kibana
-  sudo: yes
-  roles:
-    - common
-    - java
-    - kibana
+    - {
+        role: elastic,
+        elasticsearch_discovery_zen_ping_multicast_enabled: 'false',
+        elasticsearch_discovery_zen_ping_unicast_hosts: '["10.10.10.10", "10.10.10.11"]',
+        elasticsearch_network_host: "{{ ansible_eth1.ipv4.address }}"
+      }
 
 - hosts: logstash
   sudo: yes
   roles:
     - common
     - java
-    - logstash
+    - {
+        role: logstash,
+        logstash_bind_host: "{{ ansible_eth1.ipv4.address }}",
+        logstash_elasticsearch_host: '["10.10.10.10", "10.10.10.11"]'
+      }
 
 - hosts: logstash-forwarder
   sudo: yes
   roles:
     - common
-    - logstash-forwarder
+    - {
+        role: logstash-forwarder,
+        logstash_forwarder_servers: '["10.10.20.10:5043"]',
+        logstash_forwarder_tag_value: "{{ ansible_eth1.ipv4.address }}"
+      }
+
+- hosts: kibana
+  sudo: yes
+  roles:
+    - common
+    - { role: kibana, kibana_elasticsearch_url: 'http://10.10.10.10:9200' }
