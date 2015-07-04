@@ -1,0 +1,4 @@
+ssl_cert_directory: /etc/pki/tls/certs
+ssl_cert: logstash-forwarder.crt
+
+apt_cache_valid_time: 600 # seconds between "apt-get update" calls.

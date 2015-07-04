@@ -7,7 +7,6 @@
     - elastic
 
 - hosts: kibana
-  user: vagrant
   sudo: yes
   roles:
     - common
@@ -15,9 +14,14 @@
     - kibana
 
 - hosts: logstash
-  user: vagrant
   sudo: yes
   roles:
     - common
     - java
     - logstash
+
+- hosts: logstash-forwarder
+  sudo: yes
+  roles:
+    - common
+    - logstash-forwarder

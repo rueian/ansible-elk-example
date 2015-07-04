@@ -1,0 +1,23 @@
+- name: Import Elastic GPG Key
+  apt_key: url=http://packages.elasticsearch.org/GPG-KEY-elasticsearch state=present
+
+- name: Add Logstash Forwarder Repo into source list
+  apt_repository:
+    repo: 'deb http://packages.elasticsearch.org/logstashforwarder/debian stable main'
+    state: present
+    update_cache: yes
+
+- name: Install Logstash Forwarder
+  apt: pkg=logstash-forwarder state=present update_cache=yes cache_valid_time={{apt_cache_valid_time}}
+  notify: restart logstash-forwarder
+
+- name: Create directory to store ssl crt
+  file: path={{ ssl_cert_directory }} state=directory
+
+- name: Copy SSL cert
+  copy: src=files/certs/{{ ssl_cert }} dest={{ ssl_cert_directory }}
+  notify: restart logstash-forwarder
+
+- name: Configuring Logstash Forwarder
+  template: src=logstash-forwarder.conf.j2 dest=/etc/logstash-forwarder.conf owner=root group=root mode=0644
+  notify: restart logstash-forwarder
