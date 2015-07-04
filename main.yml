@@ -1,19 +1,23 @@
 ---
-# Elasticsearch Ansible Playbook
 - hosts: elastic
-  user: vagrant
   sudo: yes
   roles:
-    - { role: elastic, install_java: "false" }
+    - common
+    - java
+    - elastic
 
 - hosts: kibana
   user: vagrant
   sudo: yes
   roles:
-    - { role: kibana, install_java: "false" }
+    - common
+    - java
+    - kibana
 
 - hosts: logstash
   user: vagrant
   sudo: yes
   roles:
-    - { role: logstash, install_java: "false" }
+    - common
+    - java
+    - logstash

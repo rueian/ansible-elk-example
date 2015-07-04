@@ -1,0 +1,4 @@
+apt_cache_valid_time: 600 # seconds between "apt-get update" calls.
+apt_java_repo: ppa:webupd8team/java
+apt_java_package: oracle-java8-installer
+install_java: "true"

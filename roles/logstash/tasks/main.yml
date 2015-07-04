@@ -1,40 +1,26 @@
-- name: Install python-software-properties
-  apt: pkg=python-software-properties state=present update_cache=yes cache_valid_time={{apt_cache_valid_time}}
-
-- name: Add java repo
-  apt_repository: repo={{ apt_java_repo }} state=present update_cache=yes
-  when: install_java
-
-- name: Accept Oracle license prior JDK installation
-  debconf: name='oracle-java7-installer' question='shared/accepted-oracle-license-v1-1' value='true' vtype='select'
-  when: install_java
-
-- name: Install Java
-  apt: pkg={{apt_java_package}} state=present
-  when: install_java
-
 - name: Import Elastic GPG Key
   apt_key: url=http://packages.elasticsearch.org/GPG-KEY-elasticsearch state=present
 
 - name: Add Logstash Repo into source list
-  apt_repository: repo='deb http://packages.elasticsearch.org/logstash/{{logstash_repo_version}}/debian stable main' state=present
+  apt_repository:
+    repo: 'deb http://packages.elasticsearch.org/logstash/{{logstash_repo_version}}/debian stable main'
+    state: present
+    update_cache: yes
 
-- name: Install dependencies
-  apt: pkg={{ item }} state=present update_cache=yes
-  with_items: apt_dependencies
-
-# Install logstash
-- name: Install dependencies
-  apt: pkg={{ logstash_pkg }} state=present
+- name: Install Logstash
+  apt: pkg=logstash state=present update_cache=yes cache_valid_time={{apt_cache_valid_time}}
+  notify: restart logstash
 
 - name: Create directory to store ssl crt & key
   file: path={{ ssl_cert_directory }} state=directory
 
-- name: Copy SSL crt
-  copy: src=files/logstash-forwarder.crt dest={{ ssl_cert_directory }}/{{ ssl_cert }}
+- name: Copy SSL cert
+  copy: src=files/certs/{{ ssl_cert }} dest={{ ssl_cert_directory }}
+  notify: restart logstash
 
 - name: Copy SSL key
-  copy: src=files/logstash-forwarder.key dest={{ ssl_cert_directory }}/{{ ssl_key }}
+  copy: src=files/certs/{{ ssl_key }} dest={{ ssl_cert_directory }}
+  notify: restart logstash
 
 - name: Configuring Logstash Node
   template: src=logstash.conf.j2 dest=/etc/logstash/conf.d/logstash.conf owner=root group=root mode=0644

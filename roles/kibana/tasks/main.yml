@@ -1,43 +1,32 @@
-- name: Install python-software-properties
-  apt: pkg=python-software-properties state=present update_cache=yes cache_valid_time={{apt_cache_valid_time}}
-
-- name: Add java repo
-  apt_repository: repo={{ apt_java_repo }} state=present update_cache=yes
-  when: install_java
-
-- name: Accept Oracle license prior JDK installation
-  debconf: name='oracle-java7-installer' question='shared/accepted-oracle-license-v1-1' value='true' vtype='select'
-  when: install_java
-
-- name: Install Java
-  apt: pkg={{apt_java_package}} state=present
-  when: install_java
-
-- name: Install dependencies
-  apt: pkg={{ item }} state=present
-  with_items: apt_dependencies
-
-# Check whether we have aleady installed the same version
 - shell: if [ -e /opt/kibana-{{ kibana_version }}-{{ kibana_platform }} ]; then echo yes; else echo no; fi;
   register: version_exists
   always_run: True
 
 - name: Download kibana zip
-  get_url: url=https://download.elastic.co/kibana/kibana/kibana-{{ kibana_version }}-{{ kibana_platform }}.zip dest=/tmp
+  get_url:
+    url: https://download.elastic.co/kibana/kibana/kibana-{{ kibana_version }}-{{ kibana_platform }}.zip
+    dest: /tmp
   when: version_exists.stdout == 'no'
 
 - name: Unarchive kibana zip
-  unarchive: src=/tmp/kibana-{{ kibana_version }}-{{ kibana_platform }}.zip dest=/opt copy=no
+  unarchive:
+    src: /tmp/kibana-{{ kibana_version }}-{{ kibana_platform }}.zip
+    dest: /opt
+    copy: no
   when: version_exists.stdout == 'no'
 
 - name: Remove old kibana folder link
   file: path=/opt/kibana state=absent
+  when: version_exists.stdout == 'no'
 
 - name: Link new kibana folder
-  file: path=/opt/kibana
-        src=/opt/kibana-{{ kibana_version }}-{{ kibana_platform }}
-        state=link
-        force=yes
+  file:
+    dest: /opt/kibana
+    src: /opt/kibana-{{ kibana_version }}-{{ kibana_platform }}
+    state: link
+    force: yes
+  when: version_exists.stdout == 'no'
+  notify: restart kibana
 
 - name: Download kibana start script
   get_url: url=https://gist.githubusercontent.com/thisismitch/8b15ac909aed214ad04a/raw/bce61d85643c2dcdfbc2728c55a41dab444dca20/kibana4 dest=/etc/init.d

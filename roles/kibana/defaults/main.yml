@@ -1,11 +1,2 @@
-apt_dependencies:
-  - htop
-  - ntp
-  - unzip
-apt_java_repo: ppa:webupd8team/java
-apt_java_package: oracle-java8-installer
-apt_cache_valid_time: 300 # seconds between "apt-get update" calls.
-install_java: "true"
-
 kibana_version: 4.0.3
 kibana_platform: linux-x64
