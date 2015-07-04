@@ -1,0 +1,24 @@
+- shell: if [ -e /usr/share/elasticsearch/plugins/marvel/marvel-{{elasticsearch_plugin_marvel_version}}.jar ]; then echo yes; else echo no; fi;
+  register: version_exists
+  always_run: True
+
+- shell: if [ -e /usr/share/elasticsearch/plugins/marvel ]; then echo yes; else echo no; fi;
+  register: other_version_exists
+  always_run: True
+
+- name: Removing other Marvel Plugin
+  shell: bin/plugin --remove elasticsearch/marvel/latest chdir=/usr/share/elasticsearch
+  when: other_version_exists.stdout == 'yes' and version_exists.stdout == 'no'
+
+- name: Installing Marvel Plugin
+  shell: bin/plugin -i elasticsearch/marvel/{{ elasticsearch_plugin_marvel_version }} chdir=/usr/share/elasticsearch
+  when: version_exists.stdout == 'no'
+  notify: restart elasticsearch
+# Fix permissions
+- file:
+    path: /usr/share/elasticsearch/plugins
+    state: directory
+    owner: elasticsearch
+    group: elasticsearch
+    recurse: yes
+  when: version_exists.stdout == 'no'
