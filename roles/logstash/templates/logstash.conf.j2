@@ -11,6 +11,7 @@ filter {
 output {
   elasticsearch {
     bind_host => "{{ logstash_bind_host }}"
+    protocol => "{{ logstash_protocol }}"
     host => {{ logstash_elasticsearch_host }}
   }
 }
