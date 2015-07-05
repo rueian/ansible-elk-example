@@ -1,14 +1,20 @@
 - name: set locale
   locale_gen: name='zh_TW.UTF-8'
 
+- name: check current timezone
+  shell: cat /etc/timezone
+  register: current_zone
+  always_run: yes
+
 - name: set timezone
   copy:
-    content: 'Asia/Taipei'
+    content: "{{ timezone }}"
     dest: /etc/timezone
     owner: root
     group: root
     mode: 0644
     backup: yes
+  when: current_zone.stdout != timezone
   notify: update timezone
 
 - name: Install python-software-properties

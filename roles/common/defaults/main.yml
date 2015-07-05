@@ -1,3 +1,4 @@
+timezone: 'Asia/Taipei'
 apt_cache_valid_time: 600 # seconds between "apt-get update" calls.
 apt_dependencies:
   - htop
