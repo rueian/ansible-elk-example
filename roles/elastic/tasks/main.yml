@@ -11,7 +11,7 @@
   apt: pkg={{ elasticsearch_pkg }} state=present update_cache=yes cache_valid_time={{ apt_cache_valid_time }}
   notify: restart elasticsearch
 
-- include: marvel.yml
+- include: plugins.yml
 
 - name: Configuring Elasticsearch
   template: src=elasticsearch.yml.j2 dest=/etc/elasticsearch/elasticsearch.yml owner=root group=root mode=0644
