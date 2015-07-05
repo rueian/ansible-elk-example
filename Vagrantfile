@@ -16,6 +16,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.define "elastic#{i}" do |node|
       node.vm.hostname = "elastic#{i}"
       node.vm.network :private_network, ip: "10.10.10.#{i}"
+      node.vm.provider "virtualbox" do |v|
+        v.memory = 768
+      end
     end
   end
 
@@ -30,6 +33,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vm.define "logstash-forwarder#{i}" do |node|
       node.vm.hostname = "logstash-forwarder#{i}"
       node.vm.network :private_network, ip: "10.10.30.#{i}"
+      node.vm.provider "virtualbox" do |v|
+        v.memory = 256
+      end
     end
   end
 
