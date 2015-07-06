@@ -1,0 +1,6 @@
+packetbeat_version: 1.0.0~Beta1
+packetbeat_platform: amd64
+packetbeat_elasticsearch_host: localhost
+packetbeat_elasticsearch_port: 9200
+
+apt_cache_valid_time: 600

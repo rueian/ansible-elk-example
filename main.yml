@@ -33,6 +33,15 @@
         logstash_forwarder_tag_value: "{{ ansible_eth1.ipv4.address }}"
       }
 
+- hosts: packetbeat
+  sudo: yes
+  roles:
+    - common
+    - {
+        role: packetbeat,
+        packetbeat_elasticsearch_host: '10.10.10.10'
+      }
+
 - hosts: kibana
   sudo: yes
   roles:
