@@ -16,12 +16,12 @@ There are 6 virtual machines defined in this stack:
 
 | Hostname | IP | CPU | Memory | Role |
 | ---------- | ---------- | ---------- | ---------- | ---------- |
-| elastic10  | 10.10.10.10  | 4 | 768 MB | elasticsearch |
-| elastic11  | 10.10.10.11  | 4 | 768 MB | elasticsearch |
+| elastic10  | 10.10.10.10  | 4 | 768 MB | elasticsearch + Marvel + Watcher + Packetbeat |
+| elastic11  | 10.10.10.11  | 4 | 768 MB | elasticsearch + Marvel + Watcher + Packetbeat |
 | logstash10  | 10.10.20.10  | 4 | 512 MB | logstash |
-| logstash-forwarder10  | 10.10.30.10  | 4 | 256 MB | logstash-forwarder |
-| logstash-forwarder11  | 10.10.30.11  | 4 | 256 MB | logstash-forwarder |
-| kibana  | 10.10.40.10  | 4 | 512 MB | kibana + nginx |
+| logstash-forwarder10  | 10.10.30.10  | 4 | 256 MB | logstash-forwarder + Packetbeat |
+| logstash-forwarder11  | 10.10.30.11  | 4 | 256 MB | logstash-forwarder + Packetbeat |
+| kibana  | 10.10.40.10  | 4 | 512 MB | kibana + nginx + Packetbeat |
 
 ## Responsibility of roles
 
@@ -44,6 +44,10 @@ There are 6 virtual machines defined in this stack:
     See configurations: `roles/kibana/templates/kibana.yml.j2`
 
     See configurations: `roles/kibana/templates/nginx-sites-available-default.j2`
+
+* The `packetbeat` will parse the network traffic (http, redis, etc.) and send to elasticsearch.
+
+    See configurations: `roles/packetbeat/templates/packetbeat.yml.j2`
 
 ## Change the stack
 
