@@ -1,3 +1,4 @@
 kibana_version: 4.0.3
 kibana_platform: linux-x64
 kibana_elasticsearch_url: 'http://localhost:9200'
+apt_cache_valid_time: 600
