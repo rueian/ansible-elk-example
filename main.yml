@@ -18,6 +18,7 @@
     - java
     - {
         role: logstash,
+        logstash_protocol: http,
         logstash_bind_host: "{{ ansible_eth1.ipv4.address }}",
         logstash_elasticsearch_host: '["10.10.10.10", "10.10.10.11"]'
       }
