@@ -42,6 +42,15 @@
         packetbeat_elasticsearch_host: '10.10.10.10'
       }
 
+- hosts: topbeat
+  sudo: yes
+  roles:
+    - common
+    - {
+        role: topbeat,
+        topbeat_elasticsearch_host: '10.10.10.10'
+      }
+
 - hosts: kibana
   sudo: yes
   roles:
