@@ -20,3 +20,6 @@
 - name: Configure Packetbeat
   template: src=packetbeat.yml.j2 dest=/etc/packetbeat/packetbeat.yml
   notify: Restart Packetbeat
+
+- name: Index Packetbeat Elasticsearch
+  shell: curl -XPUT 'http://{{ packetbeat_elasticsearch_host }}:{{ packetbeat_elasticsearch_port }}/_template/packetbeat' -d@/etc/packetbeat/packetbeat.template.json
