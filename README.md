@@ -16,8 +16,8 @@ There are 6 virtual machines defined in this stack:
 
 | Hostname | IP | CPU | Memory | Role |
 | ---------- | ---------- | ---------- | ---------- | ---------- |
-| elastic10  | 10.10.10.10  | 4 | 768 MB | elasticsearch + Marvel + Watcher + Packetbeat |
-| elastic11  | 10.10.10.11  | 4 | 768 MB | elasticsearch + Marvel + Watcher + Packetbeat |
+| elastic10  | 10.10.10.10  | 4 | 768 MB | elasticsearch + Marvel + Watcher |
+| elastic11  | 10.10.10.11  | 4 | 768 MB | elasticsearch + Marvel + Watcher |
 | logstash10  | 10.10.20.10  | 4 | 512 MB | logstash |
 | logstash-forwarder10  | 10.10.30.10  | 4 | 256 MB | logstash-forwarder + Packetbeat |
 | logstash-forwarder11  | 10.10.30.11  | 4 | 256 MB | logstash-forwarder + Packetbeat |
@@ -84,6 +84,3 @@ $ vagrant provision
 # Knowing Issues
 
 The elasticsearch 1.6.0 installed from the apt repo will not able to start after rebooting the machine. See https://github.com/elastic/elasticsearch/issues/11594
-
-
-

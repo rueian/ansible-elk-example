@@ -1,4 +1,4 @@
-packetbeat_version: 1.0.0~Beta1
+packetbeat_version: 1.0.0~Beta3
 packetbeat_platform: amd64
 packetbeat_elasticsearch_host: localhost
 packetbeat_elasticsearch_port: 9200
