@@ -9,7 +9,7 @@
 
 - name: Download Packetbeat agent
   get_url:
-    url: https://download.elasticsearch.org/beats/packetbeat/packetbeat_{{ packetbeat_version }}_{{ packetbeat_platform }}.deb
+    url: https://download.elastic.co/beats/packetbeat/packetbeat_{{ packetbeat_version }}_{{ packetbeat_platform }}.deb
     dest: /tmp
   when: installed_version.stdout != '{{ packetbeat_version }}'
 
