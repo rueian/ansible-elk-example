@@ -1,12 +1,12 @@
-- shell: if [ -e /usr/share/elasticsearch/plugins/marvel/marvel-{{elasticsearch_plugin_marvel_version}}.jar ]; then echo yes; else echo no; fi;
-  register: marvel_version_exists
-  always_run: True
+# - shell: if [ -e /usr/share/elasticsearch/plugins/marvel/marvel-{{elasticsearch_plugin_marvel_version}}.jar ]; then echo yes; else echo no; fi;
+#   register: marvel_version_exists
+#   always_run: True
 
-- shell: if [ -e /usr/share/elasticsearch/plugins/marvel ]; then echo yes; else echo no; fi;
-  register: other_marvel_version_exists
-  always_run: True
+# - shell: if [ -e /usr/share/elasticsearch/plugins/marvel ]; then echo yes; else echo no; fi;
+#   register: other_marvel_version_exists
+#   always_run: True
 
-- shell: if [ -e /usr/share/elasticsearch/plugins/license/elasticsearch-license-plugin-{{elasticsearch_plugin_license_version}}.jar ]; then echo yes; else echo no; fi;
+- shell: if [ -e /usr/share/elasticsearch/plugins/license/license-{{elasticsearch_plugin_license_version}}.jar ]; then echo yes; else echo no; fi;
   register: license_version_exists
   always_run: True
 
@@ -14,7 +14,7 @@
   register: other_license_version_exists
   always_run: True
 
-- shell: if [ -e /usr/share/elasticsearch/plugins/watcher/elasticsearch-watcher-{{elasticsearch_plugin_watcher_version}}.jar ]; then echo yes; else echo no; fi;
+- shell: if [ -e /usr/share/elasticsearch/plugins/watcher/watcher-{{elasticsearch_plugin_watcher_version}}.jar ]; then echo yes; else echo no; fi;
   register: watcher_version_exists
   always_run: True
 
@@ -22,30 +22,30 @@
   register: other_watcher_version_exists
   always_run: True
 
-- name: Removing other Marvel Plugin
-  shell: bin/plugin --remove elasticsearch/marvel/latest chdir=/usr/share/elasticsearch
-  when: other_marvel_version_exists.stdout == 'yes' and marvel_version_exists.stdout == 'no'
+# - name: Removing other Marvel Plugin
+#   shell: bin/plugin remove marvel chdir=/usr/share/elasticsearch
+#   when: other_marvel_version_exists.stdout == 'yes' and marvel_version_exists.stdout == 'no'
 
 - name: Removing other License Plugin
-  shell: bin/plugin --remove elasticsearch/license/latest chdir=/usr/share/elasticsearch
+  shell: bin/plugin remove license chdir=/usr/share/elasticsearch
   when: other_license_version_exists.stdout == 'yes' and license_version_exists.stdout == 'no'
 
 - name: Removing other Watcher Plugin
-  shell: bin/plugin --remove elasticsearch/watcher/latest chdir=/usr/share/elasticsearch
+  shell: bin/plugin remove watcher chdir=/usr/share/elasticsearch
   when: other_watcher_version_exists.stdout == 'yes' and watcher_version_exists.stdout == 'no'
 
-- name: Installing Marvel Plugin
-  shell: bin/plugin -i elasticsearch/marvel/{{ elasticsearch_plugin_marvel_version }} chdir=/usr/share/elasticsearch
-  when: marvel_version_exists.stdout == 'no'
-  notify: restart elasticsearch
+# - name: Installing Marvel Plugin
+#   shell: bin/plugin -i elasticsearch/marvel/{{ elasticsearch_plugin_marvel_version }} chdir=/usr/share/elasticsearch
+#   when: marvel_version_exists.stdout == 'no'
+#   notify: restart elasticsearch
 
 - name: Installing Elasticsearch Plugin License
-  shell: bin/plugin -i elasticsearch/license/{{ elasticsearch_plugin_license_version }} chdir=/usr/share/elasticsearch
+  shell: bin/plugin install license -Des.path.conf=/etc/elasticsearch chdir=/usr/share/elasticsearch
   when: license_version_exists.stdout == 'no'
   notify: restart elasticsearch
 
 - name: Installing Watcher Plugin
-  shell: bin/plugin -i elasticsearch/watcher/{{ elasticsearch_plugin_watcher_version }} chdir=/usr/share/elasticsearch
+  shell: bin/plugin install watcher -Des.path.conf=/etc/elasticsearch chdir=/usr/share/elasticsearch
   when: watcher_version_exists.stdout == 'no'
   notify: restart elasticsearch
 
@@ -56,4 +56,4 @@
     owner: elasticsearch
     group: elasticsearch
     recurse: yes
-  when: marvel_version_exists.stdout == 'no'
+  when: watcher_version_exists.stdout == 'no'

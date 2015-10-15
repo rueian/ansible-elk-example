@@ -1,4 +1,4 @@
-kibana_version: 4.1.2
+kibana_version: 4.2.0-beta2
 kibana_platform: linux-x64
 kibana_elasticsearch_url: 'http://localhost:9200'
 kibana_beats_dashboard_version: 1.0.0-beta3
