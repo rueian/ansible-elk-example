@@ -1,5 +1,5 @@
 - name: Install Nginx
-  apt: pkg=nginx state=present update_cache=yes cache_valid_time={{apt_cache_valid_time}}
+  apt: name=nginx state=present update_cache=yes cache_valid_time={{apt_cache_valid_time}}
 
 - name: Configuring Nginx as reverse proxy
   template:

@@ -12,9 +12,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     v.cpus = 4
   end
 
-  (10..11).each do |i|
-    config.vm.define "elastic#{i}" do |node|
-      node.vm.hostname = "elastic#{i}"
+  (10..12).each do |i|
+    config.vm.define "#{i}.elastic" do |node|
+      node.vm.hostname = "#{i}.elastic"
       node.vm.network :private_network, ip: "10.10.10.#{i}"
       node.vm.provider "virtualbox" do |v|
         v.memory = 768
@@ -22,25 +22,22 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
   end
 
-  (10..10).each do |i|
-    config.vm.define "logstash#{i}" do |node|
-      node.vm.hostname = "logstash#{i}"
+  (10..14).each do |i|
+    config.vm.define "#{i}.logstash" do |node|
+      node.vm.hostname = "#{i}.logstash"
       node.vm.network :private_network, ip: "10.10.20.#{i}"
     end
   end
 
-  (10..11).each do |i|
-    config.vm.define "logstash-forwarder#{i}" do |node|
-      node.vm.hostname = "logstash-forwarder#{i}"
+  (10..10).each do |i|
+    config.vm.define "#{i}.postgres" do |node|
+      node.vm.hostname = "#{i}.postgres"
       node.vm.network :private_network, ip: "10.10.30.#{i}"
-      node.vm.provider "virtualbox" do |v|
-        v.memory = 256
-      end
     end
   end
 
-  config.vm.define "kibana" do |node|
-    node.vm.hostname = "kibana"
+  config.vm.define "10.nginx" do |node|
+    node.vm.hostname = "10.nginx"
     node.vm.network :private_network, ip: "10.10.40.10"
 
     node.vm.provision "ansible" do |ansible|

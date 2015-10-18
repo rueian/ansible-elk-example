@@ -12,42 +12,42 @@ To bring up the Vagrant environment, it requires the followings to be install on
 
 # ELK stack explanation
 
-There are 6 virtual machines defined in this stack:
+There are 10 virtual machines (5.75GB of RAM) defined in this stack:
 
 | Hostname | IP | CPU | Memory | Role |
 | ---------- | ---------- | ---------- | ---------- | ---------- |
-| elastic10  | 10.10.10.10  | 4 | 768 MB | elasticsearch + Marvel + Watcher |
-| elastic11  | 10.10.10.11  | 4 | 768 MB | elasticsearch + Marvel + Watcher |
-| logstash10  | 10.10.20.10  | 4 | 512 MB | logstash |
-| logstash-forwarder10  | 10.10.30.10  | 4 | 256 MB | logstash-forwarder + Packetbeat |
-| logstash-forwarder11  | 10.10.30.11  | 4 | 256 MB | logstash-forwarder + Packetbeat |
-| kibana  | 10.10.40.10  | 4 | 512 MB | kibana + nginx + Packetbeat |
+| 10.elastic  | 10.10.10.10  | 4 | 768 MB | elasticsearch + Topbeat |
+| 11.elastic  | 10.10.10.11  | 4 | 768 MB | elasticsearch + Topbeat |
+| 12.elastic  | 10.10.10.12  | 4 | 768 MB | elasticsearch + kibana + Topbeat |
+| 10.logstash  | 10.10.20.10  | 4 | 512 MB | logstash + Topbeat |
+| 11.logstash  | 10.10.20.11  | 4 | 512 MB | logstash + Topbeat |
+| 12.logstash  | 10.10.20.12  | 4 | 512 MB | logstash + redis + Topbeat |
+| 13.logstash  | 10.10.20.13  | 4 | 512 MB | logstash + redis |
+| 14.logstash  | 10.10.20.14  | 4 | 512 MB | logstash + redis |
+| 10.postgres  | 10.10.30.10  | 4 | 512 MB | postgres + Packetbeat + Topbeat |
+| 10.nginx  | 10.10.40.10  | 4 | 512 MB | fake-app + logstash-forwarder + Packetbeat + Topbeat |
 
-## Responsibility of roles
+## Responsibility of nodes
 
-* The two `logstash-forwarder` nodes will collect their own `/var/log/syslog` and `var/log/auth.log` and send to `logstash` node.
+* The two nodes `10.elastic` and `11.elastic` are the elasticsearch cluster collecting logs from three logstash instances `12.logstash`, `13.logstash` and `14.logstash`.
 
-    See configurations: `roles/logstash-forwarder/templates/logstash-forwarder.conf.j2`
+* The node `11.elastic` is the monitor node of the elasticsearch cluster. There is also a elasticsearch instance on it, but it comes with the watcher plugin for querying `10.elastic` and `11.elastic` cluster. The kibana instance is also installed on this node for querying `10.elastic` and `11.elastic` cluster.
 
-* The `logstash` node will receive logs send by `logstash-forwarder` and process them. Then it will send processed log to `elasticsearch` cluster. (By default, logstash communicates with elasticsearch using 'node' protocol.)
+* The two nodes `10.logstash` and `11.logstash` are the log shippers receiving logs sent by logstash-forwarder from the `10.nginx` node and send them to the redis instance on the node `12.logstash`.
 
-    See configurations: `roles/logstash/templates/logstash.conf.j2`
+* The node `12.logstash` is the logstash indexer, which reads and processes logs from the local redis, and then index them into `10.elastic` and `11.elastic` cluster.
 
+* The node `13.logstash` is the logstash indexer for the topbeats, which reads and processes logs from the local redis, and then index them into `10.elastic` and `11.elastic` cluster.
 
-* The `elasticsearch` cluster will store logs send by `logstash`.
+* The node `14.logstash` is the logstash indexer for the packetbeats, which reads and processes logs from the local redis, and then index them into `10.elastic` and `11.elastic` cluster.
 
-    See configurations: `roles/elastic/templates/elasticsearch.yml.j2`
+* The node `10.postgres` is the postgresql database instance for the fake app on the node `10.nginx`.
 
+* The node `10.nginx` is the application node which installed with a fake nodejs app I wrote. The purpose of the fake app is to generate PostgreSQL traffic, so that it can be visualized on the PostgreSQL dashboard of Kibana. Please see here for how to use it: https://github.com/rueian/fake-app. The logstash-forwarder instance on the node is responsible for sending log from local files `/var/log/syslog` and `var/log/auth.log`.
 
-* The `kibana` node is a web dashboard of `elasticsearch` cluster. Nginx is installed as reverse proxy of kibana.
+* All the `topbeat` instances are responsible for collecting system information like cpu usage and then send to the node `13.logstash`.
 
-    See configurations: `roles/kibana/templates/kibana.yml.j2`
-
-    See configurations: `roles/kibana/templates/nginx-sites-available-default.j2`
-
-* The `packetbeat` will parse the network traffic (http, redis, etc.) and send to elasticsearch.
-
-    See configurations: `roles/packetbeat/templates/packetbeat.yml.j2`
+* All the `packetbeat` instances are responsible for collecting all the http and postgresql traffic and send processed packets to the node `14.logstash`.
 
 ## Change the stack
 
@@ -59,9 +59,9 @@ If you want to change this artitecture, you may need to modify the 3 files:
 
 **And if you want to change the `logstash` node, you also need to replace the ssl certs in `files/certs`**
 
-The certs is used for communication between `logstash-forwarder` and `logstash` and is configured with SAN: 10.10.20.10, therefore you must replace them if you want to change the IP of `logstash` node.
+The certs is used for communication between `logstash-forwarder` and `logstash` and is configured with CN: *.logstash, therefore you must replace them if you want to change the hostname of `logstash` node.
 
-See [here](https://www.digitalocean.com/community/tutorials/how-to-install-elasticsearch-logstash-and-kibana-4-on-ubuntu-14-04#generate-ssl-certificates) for generating a new cert.
+See [here](https://github.com/elastic/logstash-forwarder#important-tlsssl-certificate-notes) for generating a new cert.
 
 # Bring up the stack
 
@@ -71,9 +71,7 @@ Run the command:
 $ vagrant up
 ```
 
-When finished, you should be able access `kibana` from http://10.10.40.10 and see the logs which comes from `logstash-forwarder` nodes.
-
-You can also access Marvel monitor of `elasticsearch` cluster from http://10.10.10.10:9200/_plugin/marvel or http://10.10.10.11:9200/_plugin/marvel
+When finished, you should be able access `kibana` from http://10.10.10.12 and see the logs.
 
 If you make changes in the playbook, run:
 
@@ -83,4 +81,6 @@ $ vagrant provision
 
 # Knowing Issues
 
-The elasticsearch 1.6.0 installed from the apt repo will not able to start after rebooting the machine. See https://github.com/elastic/elasticsearch/issues/11594
+* Topbeat 1.0.0-beta3 can't generate proc field with elasticsearch 2.0. But it fixed in beta4.
+
+* Kibana 4.2.0-beta2 can't use the index pattern `[index-]YYYY.MM.DD`, therefore if you wants to use the sample dashboards, you need to export the dashboard json and change all the `[packetbeat-]YYYY.MM.DD` to `packetbeat-*` ans change all the `[topbeat-]YYYY.MM.DD` to `topbeat-*` and then import the json back before using it.

@@ -1,0 +1,40 @@
+- name: Import Postgres Key
+  apt_key: url=https://www.postgresql.org/media/keys/ACCC4CF8.asc state=present
+
+- name: Add Postgres Repo into source list
+  apt_repository:
+    repo: 'deb http://apt.postgresql.org/pub/repos/apt/ {{ postgres_repo_version }} main'
+    state: present
+    update_cache: yes
+
+- name: Install Postgres
+  apt: name={{ item }} state=present update_cache=yes cache_valid_time={{ apt_cache_valid_time }}
+  with_items:
+    - python-psycopg2
+    - postgresql-server-dev-{{ postgres_version }}
+    - postgresql-{{ postgres_version }}
+  notify: restart postgres
+
+- name: Configuring Postgres
+  template: src=postgresql.conf.j2 dest=/etc/postgresql/{{ postgres_version }}/main/postgresql.conf owner=postgres group=postgres mode=0644
+  notify: restart postgres
+
+- name: Configuring Postgres
+  template: src=pg_hba.conf.j2 dest=/etc/postgresql/{{ postgres_version }}/main/pg_hba.conf owner=postgres group=postgres mode=0640
+  register: pg_hba
+
+- name: Build pg_hba file
+  lineinfile: dest=/etc/postgresql/{{ postgres_version }}/main/pg_hba.conf line="host  all  all 0.0.0.0/0 md5" state=present
+  register: pg_hba_host
+
+- name: Reload Postgres
+  service: name=postgresql state=reloaded
+  when: pg_hba.changed or pg_hba_hosts.changed
+
+- name: Create Postgres User
+  postgresql_user: name={{ postgres_user }} password={{ postgres_user_password }} role_attr_flags=SUPERUSER,LOGIN
+  become: yes
+  become_user: postgres
+
+- name: Create Postgres DB
+  postgresql_db: name={{ postgres_user_db }} login_user={{ postgres_user }} login_password={{ postgres_user_password }}

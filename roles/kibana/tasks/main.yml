@@ -38,6 +38,9 @@
   template: src=kibana.yml.j2 dest=/opt/kibana/config/kibana.yml owner=root group=root mode=0644
   notify: restart kibana
 
+- name: start kibana
+  service: name=kibana4 state=started enabled=yes
+
 - shell: if [ -e /tmp/beats-dashboards-{{ kibana_beats_dashboard_version }} ]; then echo yes; else echo no; fi;
   register: beats_dashboard_version_exists
   always_run: True
@@ -60,5 +63,3 @@
   args:
     chdir: /tmp/beats-dashboards-{{ kibana_beats_dashboard_version }}
   when: beats_dashboard_version_exists.stdout == 'no'
-
-- include: nginx.yml

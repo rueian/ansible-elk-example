@@ -1,0 +1,25 @@
+nodesource_version: "node_4.x"
+nodesource_distro: "trusty"
+
+fake_app_path: "/opt/fake-app"
+fake_app_port: 3000
+fake_app_db: "fake-app"
+fake_app_db_user: "fake-app"
+fake_app_db_password: "secret"
+fake_app_db_host: "127.0.0.1"
+fake_app_pm2_json_path: "/opt/processes.json"
+
+# pm2_apps:
+#   - /var/www/myapp/pm2.json
+#
+
+# list of paths to JSON app declarations
+pm2_apps: [ "{{fake_app_pm2_json_path}}" ]
+# startup system
+pm2_startup: ubuntu
+# start on boot
+pm2_service_enabled: yes
+# current state: started, stopped
+pm2_service_state: started
+# version
+pm2_version:

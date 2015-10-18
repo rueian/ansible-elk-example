@@ -1,0 +1,3 @@
+nginx_server_name: "example.com"
+nginx_proxy_pass: "http://localhost:3000"
+apt_cache_valid_time: 600

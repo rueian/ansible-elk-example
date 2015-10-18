@@ -1,0 +1,32 @@
+input {
+  redis {
+    host => "{{ logstash_redis_host }}"
+    port => {{ logstash_redis_port }}
+    db => {{ logstash_redis_db }}
+    key => "{{ logstash_redis_key }}"
+    data_type => "{{ logstash_redis_data_type }}"
+  }
+}
+filter {
+  if [type] == "syslog" {
+    grok {
+      match => {
+        "message" => "%{SYSLOGLINE}"
+      }
+      overwrite => [ "message" ]
+    }
+  } else if [type] == "authlog" {
+    grok {
+      match => {
+        "message" => "%{SYSLOGLINE}"
+      }
+      overwrite => [ "message" ]
+    }
+  }
+}
+output {
+  elasticsearch {
+    hosts => {{ logstash_elasticsearch_hosts }}
+    index => "{{ logstash_elasticsearch_index }}"
+  }
+}

@@ -8,10 +8,11 @@
     update_cache: yes
 
 - name: Install Elasticsearch
-  apt: pkg={{ elasticsearch_pkg }} state=present update_cache=yes cache_valid_time={{ apt_cache_valid_time }}
+  apt: name={{ elasticsearch_pkg }} state=present update_cache=yes cache_valid_time={{ apt_cache_valid_time }}
   notify: restart elasticsearch
 
 - include: plugins.yml
+  when: elasticsearch_with_plugin == 'yes'
 
 - name: Configuring Elasticsearch
   template: src=elasticsearch.yml.j2 dest=/etc/elasticsearch/elasticsearch.yml owner=root group=root mode=0644

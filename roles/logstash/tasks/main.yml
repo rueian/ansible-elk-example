@@ -8,7 +8,7 @@
     update_cache: yes
 
 - name: Install Logstash
-  apt: pkg=logstash state=present update_cache=yes cache_valid_time={{apt_cache_valid_time}}
+  apt: name=logstash state=present update_cache=yes cache_valid_time={{apt_cache_valid_time}}
   notify: restart logstash
 
 - name: Create directory to store ssl crt & key
@@ -23,5 +23,11 @@
   notify: restart logstash
 
 - name: Configuring Logstash Node
-  template: src=logstash.conf.j2 dest=/etc/logstash/conf.d/logstash.conf owner=root group=root mode=0644
+  template: src=logstash-indexer.conf.j2 dest=/etc/logstash/conf.d/logstash.conf owner=root group=root mode=0644
   notify: restart logstash
+  when: logstash_role == 'indexer'
+
+- name: Configuring Logstash Node
+  template: src=logstash-shipper.conf.j2 dest=/etc/logstash/conf.d/logstash.conf owner=root group=root mode=0644
+  notify: restart logstash
+  when: logstash_role != 'indexer'

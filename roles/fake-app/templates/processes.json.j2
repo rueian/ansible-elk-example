@@ -1,0 +1,16 @@
+{
+  "apps" : [{
+    "name"        : "fake-app",
+    "script"      : "index.js",
+    "args"        : ["--toto=heya coco", "-d", "1"],
+    "watch"       : true,
+    "node_args"   : "--harmony",
+    "merge_logs"  : true,
+    "cwd"         : "{{ fake_app_path }}",
+    "error_file" : "/var/log/fake-app/child-err.log",
+    "out_file"   : "/var/log/fake-app/child-out.log",
+    "env": {
+      "NODE_ENV": "production"
+    }
+  }]
+}
