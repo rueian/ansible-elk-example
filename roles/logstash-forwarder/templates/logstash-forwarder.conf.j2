@@ -25,11 +25,12 @@
 
   "files": [
     {
-      "paths": [
-        "/var/log/syslog",
-        "/var/log/auth.log"
-       ],
+      "paths": [ "/var/log/syslog" ],
       "fields": { "type": "syslog", "{{ logstash_forwarder_tag }}": "{{ logstash_forwarder_tag_value }}" }
+    },
+    {
+      "paths": [ "/var/log/auth.log" ],
+      "fields": { "type": "authlog", "{{ logstash_forwarder_tag }}": "{{ logstash_forwarder_tag_value }}" }
     }
   ]
 }

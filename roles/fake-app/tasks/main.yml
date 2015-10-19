@@ -1,0 +1,66 @@
+- name: Import NodeSource GPG Key
+  apt_key: url=https://deb.nodesource.com/gpgkey/nodesource.gpg.key state=present
+
+- name: Add NodeSource Repo into source list
+  apt_repository:
+    repo: 'deb https://deb.nodesource.com/{{ nodesource_version }} {{ nodesource_distro }} main'
+    state: present
+    update_cache: yes
+
+- name: Install NodeJS
+  apt: name=nodejs state=present update_cache=yes cache_valid_time={{apt_cache_valid_time}}
+
+- name: Install pm2
+  npm:
+    name: pm2
+    global: yes
+    version: "{{ pm2_version | default(omit) }}"
+  notify: restart pm2
+
+- name: Install Git
+  apt: name=git state=present update_cache=yes cache_valid_time={{apt_cache_valid_time}}
+
+- name: Pull Fake App
+  git: repo=https://github.com/rueian/fake-app.git dest={{ fake_app_path }}
+
+- name: Configuring Fake App
+  template:
+    src: production.json.j2
+    dest: "{{ fake_app_path }}/config/production.json"
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart pm2
+
+- name: Configuring Fake App
+  template:
+    src: processes.json.j2
+    dest: "{{ fake_app_pm2_json_path }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart pm2
+
+- name: Install packages
+  npm: path={{ fake_app_path }}
+  notify: restart pm2
+
+- name: installing pm2 startup script
+  command: >
+    pm2 startup {{ pm2_startup }}
+
+- name: Deleting all apps
+  command: >
+    pm2 delete all
+  ignore_errors: yes
+
+- name: Starting apps
+  command: >
+    pm2 start {{ item }}
+  with_items: pm2_apps
+
+- name: Configuring service
+  service:
+    name: pm2-init.sh
+    state: "{{ pm2_service_state }}"
+    enabled: "{{ pm2_service_enabled }}"

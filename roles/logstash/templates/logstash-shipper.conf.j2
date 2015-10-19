@@ -1,0 +1,21 @@
+input {
+  lumberjack {
+    port => {{ logstash_listen_port }}
+    ssl_certificate => "{{ ssl_cert_directory }}/{{ ssl_cert }}"
+    ssl_key => "{{ ssl_cert_directory }}/{{ ssl_key }}"
+  }
+}
+filter {
+  mutate {
+    add_field => { "shipper" => "{{ inventory_hostname }}" }
+  }
+}
+output {
+  redis {
+    host => "{{ logstash_redis_host }}"
+    port => {{ logstash_redis_port }}
+    db => {{ logstash_redis_db }}
+    key => "{{ logstash_redis_key }}-%{@type}-%{+yyyy.MM.dd.HH}"
+    data_type => "channel"
+  }
+}

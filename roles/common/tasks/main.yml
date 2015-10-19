@@ -18,8 +18,8 @@
   notify: update timezone
 
 - name: Install python-software-properties
-  apt: pkg=python-software-properties state=present update_cache=yes cache_valid_time={{apt_cache_valid_time}}
+  apt: name=python-software-properties state=present update_cache=yes cache_valid_time={{apt_cache_valid_time}}
 
 - name: Install common dependencies
-  apt: pkg={{ item }} state=present update_cache=yes cache_valid_time={{apt_cache_valid_time}}
+  apt: name={{ item }} state=present update_cache=yes cache_valid_time={{apt_cache_valid_time}}
   with_items: apt_dependencies

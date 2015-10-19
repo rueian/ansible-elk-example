@@ -1,0 +1,8 @@
+postgres_repo_version: trusty-pgdg
+postgres_version: 9.4
+
+postgres_user: fake-app
+postgres_user_password: secret
+postgres_user_db: fake-app
+
+apt_cache_valid_time: 600 # seconds between "apt-get update" calls.

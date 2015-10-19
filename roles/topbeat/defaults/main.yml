@@ -1,0 +1,7 @@
+topbeat_version: 1.0.0-beta3
+topbeat_version_check: 1.0.0~beta3
+topbeat_platform: amd64
+topbeat_elasticsearch_host: 'localhost:9200'
+topbeat_redis_host: 'localhost'
+
+apt_cache_valid_time: 600

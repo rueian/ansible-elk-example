@@ -1,10 +1,10 @@
 server {
     listen 80;
 
-    server_name example.com;
+    server_name {{ nginx_server_name }};
 
     location / {
-        proxy_pass http://localhost:5601;
+        proxy_pass {{ nginx_proxy_pass }};
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';

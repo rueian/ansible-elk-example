@@ -8,7 +8,7 @@
     update_cache: yes
 
 - name: Install Logstash Forwarder
-  apt: pkg=logstash-forwarder state=present update_cache=yes cache_valid_time={{apt_cache_valid_time}}
+  apt: name=logstash-forwarder state=present update_cache=yes cache_valid_time={{apt_cache_valid_time}}
   notify: restart logstash-forwarder
 
 - name: Create directory to store ssl crt

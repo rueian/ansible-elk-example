@@ -1,5 +1,5 @@
 - name: Install Packetbeat dependencies
-  apt: pkg=libpcap0.8 state=present update_cache=yes cache_valid_time={{ apt_cache_valid_time }}
+  apt: name=libpcap0.8 state=present update_cache=yes cache_valid_time={{ apt_cache_valid_time }}
 
 - name: Check if Packetbeat is already at the right version
   shell: dpkg -s packetbeat | grep Version | awk '{print $2}'
@@ -9,14 +9,17 @@
 
 - name: Download Packetbeat agent
   get_url:
-    url: https://download.elasticsearch.org/beats/packetbeat/packetbeat_{{ packetbeat_version }}_{{ packetbeat_platform }}.deb
+    url: https://download.elastic.co/beats/packetbeat/packetbeat_{{ packetbeat_version }}_{{ packetbeat_platform }}.deb
     dest: /tmp
-  when: installed_version.stdout != '{{ packetbeat_version }}'
+  when: installed_version.stdout != '{{ packetbeat_version_check }}'
 
 - name: Install Packetbeat agent
   apt: deb=/tmp/packetbeat_{{ packetbeat_version }}_{{ packetbeat_platform }}.deb
-  when: installed_version.stdout != '{{ packetbeat_version }}'
+  when: installed_version.stdout != '{{ packetbeat_version_check }}'
 
 - name: Configure Packetbeat
   template: src=packetbeat.yml.j2 dest=/etc/packetbeat/packetbeat.yml
   notify: Restart Packetbeat
+
+- name: Index Packetbeat Elasticsearch
+  shell: curl -XPUT 'http://{{ packetbeat_elasticsearch_host }}/_template/packetbeat' -d@/etc/packetbeat/packetbeat.template.json

@@ -1,0 +1,22 @@
+- name: Check if Topbeat is already at the right version
+  shell: dpkg -s topbeat | grep Version | awk '{print $2}'
+  register: installed_version
+  always_run: True
+  ignore_errors: True
+
+- name: Download Topbeat agent
+  get_url:
+    url: https://download.elastic.co/beats/topbeat/topbeat_{{ topbeat_version }}_{{ topbeat_platform }}.deb
+    dest: /tmp
+  when: installed_version.stdout != '{{ topbeat_version_check }}'
+
+- name: Install Topbeat agent
+  apt: deb=/tmp/topbeat_{{ topbeat_version }}_{{ topbeat_platform }}.deb
+  when: installed_version.stdout != '{{ topbeat_version_check }}'
+
+- name: Configure Topbeat
+  template: src=topbeat.yml.j2 dest=/etc/topbeat/topbeat.yml
+  notify: Restart Topbeat
+
+- name: Index Topbeat Elasticsearch
+  shell: curl -XPUT "http://{{ topbeat_elasticsearch_host }}/_template/topbeat" -d@/etc/topbeat/topbeat.template.json

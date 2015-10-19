@@ -38,4 +38,28 @@
   template: src=kibana.yml.j2 dest=/opt/kibana/config/kibana.yml owner=root group=root mode=0644
   notify: restart kibana
 
-- include: nginx.yml
+- name: start kibana
+  service: name=kibana4 state=started enabled=yes
+
+- shell: if [ -e /tmp/beats-dashboards-{{ kibana_beats_dashboard_version }} ]; then echo yes; else echo no; fi;
+  register: beats_dashboard_version_exists
+  always_run: True
+
+- name: Download Beats Dashboard
+  get_url:
+    url: https://download.elastic.co/beats/dashboards/beats-dashboards-{{ kibana_beats_dashboard_version }}.tar.gz
+    dest: /tmp
+  when: beats_dashboard_version_exists.stdout == 'no'
+
+- name: Unarchive Beats Dashboard tar
+  unarchive:
+    src: /tmp/beats-dashboards-{{ kibana_beats_dashboard_version }}.tar.gz
+    dest: /tmp
+    copy: no
+  when: beats_dashboard_version_exists.stdout == 'no'
+
+- name: Install Beats Dashboard
+  shell: ./load.sh {{ kibana_elasticsearch_url }}
+  args:
+    chdir: /tmp/beats-dashboards-{{ kibana_beats_dashboard_version }}
+  when: beats_dashboard_version_exists.stdout == 'no'

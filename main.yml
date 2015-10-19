@@ -1,49 +1,166 @@
 ---
-- hosts: elastic
+- hosts: all
+  sudo: yes
+  tasks:
+    - name: Build hosts file
+      lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ hostvars[item].ansible_eth1.ipv4.address }} {{item}}" state=present
+      when: hostvars[item].ansible_eth1.ipv4.address is defined
+      with_items: groups['all']
+
+- hosts: elastic-cluster
   sudo: yes
   roles:
-    - common
-    - java
+    - { role: common, tags: ["init"] }
+    - { role: java, tags: ["init"] }
     - {
         role: elastic,
+        elasticsearch_cluster_name: 'elastic',
         elasticsearch_discovery_zen_ping_multicast_enabled: 'false',
-        elasticsearch_discovery_zen_ping_unicast_hosts: '["10.10.10.10", "10.10.10.11"]',
-        elasticsearch_network_host: "{{ ansible_eth1.ipv4.address }}"
+        elasticsearch_discovery_zen_ping_unicast_hosts: '["10.elastic", "11.elastic"]',
+        elasticsearch_network_host: "{{ inventory_hostname }}"
       }
 
-- hosts: logstash
+- hosts: elastic-mon
   sudo: yes
   roles:
-    - common
-    - java
+    - { role: common, tags: ["init"] }
+    - { role: java, tags: ["init"] }
     - {
-        role: logstash,
-        logstash_protocol: http,
-        logstash_bind_host: "{{ ansible_eth1.ipv4.address }}",
-        logstash_elasticsearch_host: '["10.10.10.10", "10.10.10.11"]'
-      }
-
-- hosts: logstash-forwarder
-  sudo: yes
-  roles:
-    - common
-    - {
-        role: logstash-forwarder,
-        logstash_forwarder_servers: '["10.10.20.10:5043"]',
-        logstash_forwarder_tag_value: "{{ ansible_eth1.ipv4.address }}"
-      }
-
-- hosts: packetbeat
-  sudo: yes
-  roles:
-    - common
-    - {
-        role: packetbeat,
-        packetbeat_elasticsearch_host: '10.10.10.10'
+        role: elastic,
+        elasticsearch_with_plugin: 'yes',
+        elasticsearch_cluster_name: 'elastic-mon',
+        elasticsearch_discovery_zen_ping_multicast_enabled: 'false',
+        elasticsearch_network_host: "{{ inventory_hostname }}"
       }
 
 - hosts: kibana
   sudo: yes
   roles:
-    - common
-    - { role: kibana, kibana_elasticsearch_url: 'http://10.10.10.10:9200' }
+    - { role: common, tags: ["init"] }
+    - {
+        role: kibana,
+        kibana_elasticsearch_url: "http://10.elastic:9200"
+      }
+    - {
+        role: nginx,
+        nginx_proxy_name: "12.elastic",
+        nginx_proxy_pass: "http://localhost:5601"
+      }
+
+- hosts: logstash-message-queue
+  sudo: yes
+  roles:
+    - { role: common, tags: ["init"] }
+    - {
+        role: redis,
+        redis_bind_ip: "127.0.0.1 {{ ansible_eth1.ipv4.address }}"
+      }
+
+- hosts: logstash-indexer
+  sudo: yes
+  roles:
+    - { role: common, tags: ["init"] }
+    - { role: java, tags: ["init"] }
+    - {
+        role: logstash,
+        logstash_role: indexer,
+        logstash_elasticsearch_hosts: '["10.elastic", "11.elastic"]',
+        logstash_redis_host: "127.0.0.1",
+        logstash_redis_key: "logstash*",
+      }
+
+- hosts: topbeat-indexer
+  sudo: yes
+  roles:
+    - { role: common, tags: ["init"] }
+    - { role: java, tags: ["init"] }
+    - {
+        role: logstash,
+        logstash_role: indexer,
+        logstash_elasticsearch_hosts: '["10.elastic", "11.elastic"]',
+        logstash_redis_host: "127.0.0.1",
+        logstash_redis_key: "topbeat",
+        logstash_redis_data_type: "list",
+        logstash_elasticsearch_index: 'topbeat-%{+YYYY.MM.dd}'
+      }
+
+- hosts: packetbeat-indexer
+  sudo: yes
+  roles:
+    - { role: common, tags: ["init"] }
+    - { role: java, tags: ["init"] }
+    - {
+        role: logstash,
+        logstash_role: indexer,
+        logstash_elasticsearch_hosts: '["10.elastic", "11.elastic"]',
+        logstash_redis_host: "127.0.0.1",
+        logstash_redis_key: "packetbeat",
+        logstash_redis_data_type: "list",
+        logstash_elasticsearch_index: 'packetbeat-%{+YYYY.MM.dd}'
+      }
+
+- hosts: logstash-shipper
+  sudo: yes
+  roles:
+    - { role: common, tags: ["init"] }
+    - { role: java, tags: ["init"] }
+    - {
+        role: logstash,
+        logstash_role: shipper,
+        logstash_redis_host: "12.logstash"
+      }
+
+- hosts: postgres-cluster
+  sudo: yes
+  roles:
+    - { role: common, tags: ["init"] }
+    - {
+        role: postgres
+      }
+
+- hosts: app
+  sudo: yes
+  roles:
+    - { role: common, tags: ["init"] }
+    - {
+        role: fake-app,
+        fake_app_db_host: '10.postgres'
+      }
+
+- hosts: nginx
+  sudo: yes
+  roles:
+    - { role: common, tags: ["init"] }
+    - {
+        role: nginx,
+        nginx_server_name: '10.nginx',
+        nginx_proxy_pass: 'http://localhost:3000'
+      }
+
+- hosts: logstash-forwarder
+  sudo: yes
+  roles:
+    - { role: common, tags: ["init"] }
+    - {
+        role: logstash-forwarder,
+        logstash_forwarder_servers: '["10.logstash:5043", "11.logstash:5043"]',
+        logstash_forwarder_tag_value: "{{ inventory_hostname }}"
+      }
+
+- hosts: packetbeat
+  sudo: yes
+  roles:
+    - {
+        role: packetbeat,
+        packetbeat_elasticsearch_host: '10.elastic:9200',
+        packetbeat_redis_host: '14.logstash'
+      }
+
+- hosts: topbeat
+  sudo: yes
+  roles:
+    - {
+        role: topbeat,
+        topbeat_elasticsearch_host: '10.elastic:9200',
+        topbeat_redis_host: '13.logstash'
+      }

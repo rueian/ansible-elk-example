@@ -83,11 +83,10 @@ output:
   elasticsearch:
     # Uncomment out this option if you want to output to Elasticsearch. The
     # default is false.
-    enabled: true
+    enabled: false
 
     # Set the host and port where to find Elasticsearch.
-    host: "{{ packetbeat_elasticsearch_host }}"
-    port: {{ packetbeat_elasticsearch_port }}
+    # hosts: ["localhost:9200"]
 
     # Optional protocol and basic auth credentials
     # protocol: "https"
@@ -96,7 +95,7 @@ output:
 
     # Comment this option if you don't want to store the topology in
     # Elasticsearch. The default is false.
-    save_topology: true
+    # save_topology: true
 
     # Optional index name. The default is packetbeat and generates
     # [packetbeat-]YYYY.MM.DD keys.
@@ -104,3 +103,40 @@ output:
 
     # Optional HTTP Path
     # path: "/elasticsearch"
+
+    output:
+
+  redis:
+    # Uncomment out this option if you want to output to Redis. The default is false.
+    enabled: true
+
+    # Set the host and port where to find Redis.
+    host: "{{packetbeat_redis_host}}"
+    port: 6379
+
+    # Uncomment out this option if you want to store the topology in Redis.
+    # The default is false.
+    save_topology: true
+
+    # Optional index name. The default is packetbeat and generates packetbeat keys.
+    index: "packetbeat"
+
+    # Optional Redis database number where the events are stored
+    # The default is 0.
+    db: 0
+
+    # Optional Redis database number where the topology is stored
+    # The default is 1. It must have a different value than db.
+    db_topology: 1
+
+    # Optional password to authenticate with. By default, no
+    # password is set.
+    # password: ""
+
+    # Optional Redis initial connection timeout in seconds.
+    # The default is 5 seconds.
+    timeout: 5
+
+    # Optional interval for reconnecting to failed Redis connections.
+    # The default is 1 second.
+    reconnect_interval: 1
