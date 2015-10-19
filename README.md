@@ -16,16 +16,16 @@ There are 10 virtual machines (5.75GB of RAM) defined in this stack:
 
 | Hostname | IP | CPU | Memory | Role |
 | ---------- | ---------- | ---------- | ---------- | ---------- |
-| 10.elastic  | 10.10.10.10  | 4 | 768 MB | elasticsearch + Topbeat |
-| 11.elastic  | 10.10.10.11  | 4 | 768 MB | elasticsearch + Topbeat |
-| 12.elastic  | 10.10.10.12  | 4 | 768 MB | elasticsearch + kibana + Topbeat |
-| 10.logstash  | 10.10.20.10  | 4 | 512 MB | logstash + Topbeat |
-| 11.logstash  | 10.10.20.11  | 4 | 512 MB | logstash + Topbeat |
-| 12.logstash  | 10.10.20.12  | 4 | 512 MB | logstash + redis + Topbeat |
+| 10.elastic  | 10.10.10.10  | 4 | 768 MB | elasticsearch + topbeat |
+| 11.elastic  | 10.10.10.11  | 4 | 768 MB | elasticsearch + topbeat |
+| 12.elastic  | 10.10.10.12  | 4 | 768 MB | elasticsearch + kibana + topbeat |
+| 10.logstash  | 10.10.20.10  | 4 | 512 MB | logstash + topbeat |
+| 11.logstash  | 10.10.20.11  | 4 | 512 MB | logstash + topbeat |
+| 12.logstash  | 10.10.20.12  | 4 | 512 MB | logstash + redis + topbeat |
 | 13.logstash  | 10.10.20.13  | 4 | 512 MB | logstash + redis |
 | 14.logstash  | 10.10.20.14  | 4 | 512 MB | logstash + redis |
-| 10.postgres  | 10.10.30.10  | 4 | 512 MB | postgres + Packetbeat + Topbeat |
-| 10.nginx  | 10.10.40.10  | 4 | 512 MB | fake-app + logstash-forwarder + Packetbeat + Topbeat |
+| 10.postgres  | 10.10.30.10  | 4 | 512 MB | postgres + packetbeat + topbeat |
+| 10.nginx  | 10.10.40.10  | 4 | 512 MB | fake-app + logstash-forwarder + packetbeat + topbeat |
 
 ## Responsibility of nodes
 
@@ -43,7 +43,7 @@ There are 10 virtual machines (5.75GB of RAM) defined in this stack:
 
 * The node `10.postgres` is the postgresql database instance for the fake app on the node `10.nginx`.
 
-* The node `10.nginx` is the application node which installed with a fake nodejs app I wrote. The purpose of the fake app is to generate PostgreSQL traffic, so that it can be visualized on the PostgreSQL dashboard of Kibana. Please see here for how to use it: https://github.com/rueian/fake-app. The logstash-forwarder instance on the node is responsible for sending log from local files `/var/log/syslog` and `var/log/auth.log`.
+* The node `10.nginx` is the application node which installed with a fake nodejs app I wrote. The purpose of the fake app is to generate PostgreSQL traffic, so that it can be visualized on the PostgreSQL dashboard of Kibana. **Please see here for how to use it: https://github.com/rueian/fake-app**. The logstash-forwarder instance on the node is responsible for sending log from local files `/var/log/syslog` and `var/log/auth.log`.
 
 * All the `topbeat` instances are responsible for collecting system information like cpu usage and then send to the node `13.logstash`.
 
@@ -59,7 +59,7 @@ If you want to change this artitecture, you may need to modify the 3 files:
 
 **And if you want to change the `logstash` node, you also need to replace the ssl certs in `files/certs`**
 
-The certs is used for communication between `logstash-forwarder` and `logstash` and is configured with CN: *.logstash, therefore you must replace them if you want to change the hostname of `logstash` node.
+The certs is used for communication between `logstash-forwarder` and `logstash` and is configured with CN: `*.logstash`, therefore you must replace them if you want to change the hostname of `logstash` node.
 
 See [here](https://github.com/elastic/logstash-forwarder#important-tlsssl-certificate-notes) for generating a new cert.
 
@@ -79,8 +79,6 @@ If you make changes in the playbook, run:
 $ vagrant provision
 ```
 
-# Knowing Issues
+# Known Issues
 
-* Topbeat 1.0.0-beta3 can't generate proc field with elasticsearch 2.0. But it fixed in beta4.
-
-* Kibana 4.2.0-beta2 can't use the index pattern `[index-]YYYY.MM.DD`, therefore if you wants to use the sample dashboards, you need to export the dashboard json and change all the `[packetbeat-]YYYY.MM.DD` to `packetbeat-*` ans change all the `[topbeat-]YYYY.MM.DD` to `topbeat-*` and then import the json back before using it.
+* Topbeat 1.0.0-beta3 can't generate proc field with elasticsearch 2.0. But it is fixed in beta4.
