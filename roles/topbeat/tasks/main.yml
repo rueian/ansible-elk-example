@@ -20,3 +20,6 @@
 
 - name: Index Topbeat Elasticsearch
   shell: curl -XPUT "http://{{ topbeat_elasticsearch_host }}/_template/topbeat" -d@/etc/topbeat/topbeat.template.json
+
+- name: Start Topbeat
+  service: name=topbeat state=started
